@@ -129,3 +129,6 @@ tags
 !.vscode/launch.json
 !.vscode/extensions.json
 
+# Configuration files
+credentials.ini
+
