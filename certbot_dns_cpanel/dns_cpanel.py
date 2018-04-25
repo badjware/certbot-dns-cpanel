@@ -98,12 +98,15 @@ class _CPanelClient:
 
     def del_txt_record(self, record_name, record_content, record_ttl=60):
         cpanel_domain, _ = self._get_domain_and_name(record_name)
-        record_line = self._get_record_line(cpanel_domain, record_name, record_content)
+        record_lines = self._get_record_line(cpanel_domain, record_name, record_content)
 
-        if record_line:
-            data = self.data.copy()
-            data['cpanel_jsonapi_func'] = 'remove_zone_record'
-            data['domain'] = cpanel_domain
+        data = self.data.copy()
+        data['cpanel_jsonapi_func'] = 'remove_zone_record'
+        data['domain'] = cpanel_domain
+
+        # the lines get shifted when we remove one, so we reverse-sort to avoid that
+        record_lines.sort(reverse=True)
+        for record_line in record_lines:
             data['line'] = record_line
 
             with request.urlopen(
@@ -135,7 +138,7 @@ class _CPanelClient:
         return (cpanel_domain, cpanel_name)
 
     def _get_record_line(self, cpanel_domain, record_name, record_content):
-        record_line = None
+        record_lines = []
 
         data = self.data.copy()
         data['cpanel_jsonapi_func'] = 'fetchzone_records'
@@ -151,7 +154,6 @@ class _CPanelClient:
             )
         ) as response:
             response_data = json.load(response)['cpanelresult']['data']
-            if len(response_data) == 1:
-                record_line = response_data[0]['line']
+            record_lines = [int(d['line']) for d in response_data]
 
-        return record_line
+        return record_lines
