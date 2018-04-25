@@ -52,7 +52,7 @@ class Authenticator(dns_common.DNSAuthenticator):
         self._get_cpanel_client().add_txt_record(validation_domain_name, validation)
 
     def _cleanup(self, domain, validation_domain_name, validation):
-        self._get_cpanel_client().add_txt_record(validation_domain_name, validation)
+        self._get_cpanel_client().del_txt_record(validation_domain_name, validation)
 
     def _get_cpanel_client(self):
         return _CPanelClient(
@@ -97,7 +97,22 @@ class _CPanelClient:
             logger.debug(response.read())
 
     def del_txt_record(self, record_name, record_content, record_ttl=60):
-        pass
+        cpanel_domain, _ = self._get_domain_and_name(record_name)
+        record_line = self._get_record_line(cpanel_domain, record_name, record_content)
+
+        if record_line:
+            data = self.data.copy()
+            data['cpanel_jsonapi_func'] = 'remove_zone_record'
+            data['domain'] = cpanel_domain
+            data['line'] = record_line
+
+            with request.urlopen(
+                request.Request(
+                    "%s?%s" % (self.request_url, urlencode(data)),
+                    headers=self.headers
+                )
+            ) as response:
+                logger.debug(response.read())
 
     def _get_domain_and_name(self, record_domain):
         cpanel_domain = ''
@@ -119,5 +134,24 @@ class _CPanelClient:
 
         return (cpanel_domain, cpanel_name)
 
-    def _get_record_number(self, cpanel_domain, cpanel_name):
-        pass
+    def _get_record_line(self, cpanel_domain, record_name, record_content):
+        record_line = None
+
+        data = self.data.copy()
+        data['cpanel_jsonapi_func'] = 'fetchzone_records'
+        data['domain'] = cpanel_domain
+        data['name'] = record_name + '.' if not record_name.endswith('.') else ''
+        data['type'] = 'TXT'
+        data['txtdata'] = record_content
+
+        with request.urlopen(
+            request.Request(
+                "%s?%s" % (self.request_url, urlencode(data)),
+                headers=self.headers
+            )
+        ) as response:
+            response_data = json.load(response)['cpanelresult']['data']
+            if len(response_data) == 1:
+                record_line = response_data[0]['line']
+
+        return record_line
