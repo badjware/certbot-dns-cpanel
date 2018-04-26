@@ -41,9 +41,7 @@ class Authenticator(dns_common.DNSAuthenticator):
             'credentials',
             'The cPanel credentials INI file',
             {
-                'host': 'cPanel host',
-                'port': 'cPanel port',
-                'accountid': 'cPanel account id',
+                'url': 'cPanel url',
                 'username': 'cPanel username',
                 'password': 'cPanel password'
             }
@@ -57,17 +55,15 @@ class Authenticator(dns_common.DNSAuthenticator):
 
     def _get_cpanel_client(self):
         return _CPanelClient(
-            self.credentials.conf('host'),
-            self.credentials.conf('port'),
-            self.credentials.conf('accountid'),
+            self.credentials.conf('url'),
             self.credentials.conf('username'),
             self.credentials.conf('password')
         )
 
 class _CPanelClient:
 
-    def __init__(self, host, port, accountid, username, password):
-        self.request_url = "https://%s:%s/json-api/cpanel" % (host, port)
+    def __init__(self, url, username, password):
+        self.request_url = "%s/json-api/cpanel" % url
         self.data = {
             'cpanel_jsonapi_user': username,
             'cpanel_jsonapi_apiversion': '2',
