@@ -27,13 +27,13 @@ class Authenticator(dns_common.DNSAuthenticator):
         self.credentials = None
 
     @classmethod
-    def add_parser_arguments(cls, add):
+    def add_parser_arguments(cls, add): # pylint: disable=arguments-differ
         super(Authenticator, cls).add_parser_arguments(add, default_propagation_seconds=10)
         add("credentials",
             type=str,
             help="The cPanel credentials INI file")
 
-    def more_info(self):
+    def more_info(self): # pylint: disable=missing-docstring
         return self.description
 
     def _setup_credentials(self):
@@ -61,7 +61,7 @@ class Authenticator(dns_common.DNSAuthenticator):
         )
 
 class _CPanelClient:
-
+    """Encapsulate communications with the cPanel API 2"""
     def __init__(self, url, username, password):
         self.request_url = "%s/json-api/cpanel" % url
         self.data = {
@@ -74,6 +74,11 @@ class _CPanelClient:
         }
 
     def add_txt_record(self, record_name, record_content, record_ttl=60):
+        """Add a TXT record
+        :param str record_name: the domain name to add
+        :param str record_content: the content of the TXT record to add
+        :param int record_ttl: the TTL of the record to add
+        """
         cpanel_zone, cpanel_name = self._get_zone_and_name(record_name)
 
         data = self.data.copy()
@@ -98,9 +103,14 @@ class _CPanelClient:
                 raise errors.PluginError("Error adding TXT record: %s" % response_data['data'][0]['result']['statusmsg'])
 
     def del_txt_record(self, record_name, record_content, record_ttl=60):
+        """Remove a TXT record
+        :param str record_name: the domain name to remove
+        :param str record_content: the content of the TXT record to remove
+        :param int record_ttl: the TTL of the record to remove
+        """
         cpanel_zone, _ = self._get_zone_and_name(record_name)
 
-        record_lines = self._get_record_line(cpanel_zone, record_name, record_content)
+        record_lines = self._get_record_line(cpanel_zone, record_name, record_content, record_ttl)
 
         data = self.data.copy()
         data['cpanel_jsonapi_func'] = 'remove_zone_record'
@@ -125,6 +135,11 @@ class _CPanelClient:
                     raise errors.PluginError("Error removing TXT record: %s" % response_data['data'][0]['result']['statusmsg'])
 
     def _get_zone_and_name(self, record_domain):
+        """Find a suitable zone for a domain
+        :param str record_name: the domain name
+        :returns: (the zone, the name in the zone)
+        :rtype: tuple
+        """
         cpanel_zone = ''
         cpanel_name = ''
 
@@ -149,7 +164,15 @@ class _CPanelClient:
 
         return (cpanel_zone, cpanel_name)
 
-    def _get_record_line(self, cpanel_zone, record_name, record_content):
+    def _get_record_line(self, cpanel_zone, record_name, record_content, record_ttl):
+        """Find the line numbers of a record a zone
+        :param str cpanel_zone: the zone of the record
+        :param str record_name: the name in the zone of the record
+        :param str record_content: the content of the record
+        :param str cpanel_ttl: the ttl of the record
+        :returns: the line number and all it's duplicates
+        :rtype: list
+        """
         record_lines = []
 
         data = self.data.copy()
@@ -158,6 +181,7 @@ class _CPanelClient:
         data['name'] = record_name + '.' if not record_name.endswith('.') else ''
         data['type'] = 'TXT'
         data['txtdata'] = record_content
+        data['ttl'] = record_ttl
 
         with request.urlopen(
             request.Request(
