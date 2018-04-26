@@ -78,11 +78,11 @@ class _CPanelClient:
         }
 
     def add_txt_record(self, record_name, record_content, record_ttl=60):
-        cpanel_domain, cpanel_name = self._get_domain_and_name(record_name)
+        cpanel_zone, cpanel_name = self._get_zone_and_name(record_name)
 
         data = self.data.copy()
         data['cpanel_jsonapi_func'] = 'add_zone_record'
-        data['domain'] = cpanel_domain
+        data['domain'] = cpanel_zone
         data['name'] = cpanel_name
         data['type'] = 'TXT'
         data['txtdata'] = record_content
@@ -102,13 +102,13 @@ class _CPanelClient:
                 raise errors.PluginError("Error adding TXT record: %s" % response_data['data'][0]['result']['statusmsg'])
 
     def del_txt_record(self, record_name, record_content, record_ttl=60):
-        cpanel_domain, _ = self._get_domain_and_name(record_name)
+        cpanel_zone, _ = self._get_zone_and_name(record_name)
 
-        record_lines = self._get_record_line(cpanel_domain, record_name, record_content)
+        record_lines = self._get_record_line(cpanel_zone, record_name, record_content)
 
         data = self.data.copy()
         data['cpanel_jsonapi_func'] = 'remove_zone_record'
-        data['domain'] = cpanel_domain
+        data['domain'] = cpanel_zone
 
         # the lines get shifted when we remove one, so we reverse-sort to avoid that
         record_lines.sort(reverse=True)
@@ -128,8 +128,8 @@ class _CPanelClient:
                 else:
                     raise errors.PluginError("Error removing TXT record: %s" % response_data['data'][0]['result']['statusmsg'])
 
-    def _get_domain_and_name(self, record_domain):
-        cpanel_domain = ''
+    def _get_zone_and_name(self, record_domain):
+        cpanel_zone = ''
         cpanel_name = ''
 
         data = self.data.copy()
@@ -145,20 +145,20 @@ class _CPanelClient:
             logger.debug(response_data)
             for zone in response_data['data'][0]['zones']:
                 if record_domain is zone or record_domain.endswith('.' + zone):
-                    cpanel_domain = zone
+                    cpanel_zone = zone
                     cpanel_name = record_domain[:-len(zone)-1]
 
-        if not cpanel_domain:
+        if not cpanel_zone:
             raise errors.PluginError("Could not get the zone for %s. Is this name in a zone managed in cPanel?" % record_domain)
 
-        return (cpanel_domain, cpanel_name)
+        return (cpanel_zone, cpanel_name)
 
-    def _get_record_line(self, cpanel_domain, record_name, record_content):
+    def _get_record_line(self, cpanel_zone, record_name, record_content):
         record_lines = []
 
         data = self.data.copy()
         data['cpanel_jsonapi_func'] = 'fetchzone_records'
-        data['domain'] = cpanel_domain
+        data['domain'] = cpanel_zone
         data['name'] = record_name + '.' if not record_name.endswith('.') else ''
         data['type'] = 'TXT'
         data['txtdata'] = record_content
