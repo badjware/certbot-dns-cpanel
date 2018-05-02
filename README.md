@@ -44,6 +44,18 @@ certbot run \
 ```
 The certbot documentation has some additionnal informations about combining authenticator and installer plugins: https://certbot.eff.org/docs/using.html#getting-certificates-and-choosing-plugins
 
+## Docker
+A docker image based on the [certbot/certbot](https://hub.docker.com/r/certbot/certbot/) is provided for your convenience:
+```
+docker run \
+-v /path/to/credentials.ini:/tmp/credentials.ini \
+badjware/certbot-dns-cpanel certonly \
+--authenticator certbot-dns-cpanel:cpanel \
+--certbot-dns-cpanel:panel-credentials /tmp/credentials.ini \
+-d exemple.com \
+-d www.exemple.com
+```
+
 ## Additional documentation
 * https://documentation.cpanel.net/display/DD/Guide+to+cPanel+API+2
 * https://certbot.eff.org/docs/
