@@ -13,21 +13,21 @@ Download the file `credentials.ini.exemple` and rename it to `credentials.ini`. 
 ```
 # The url cPanel url
 # include the scheme and the port number (usually 2083 for https)
-certbot_dns_cpanel:authenticator_url = https://cpanel.exemple.com:2083
+certbot_dns_cpanel:cpanel_url = https://cpanel.exemple.com:2083
 
 # The cPanel username
-certbot_dns_cpanel:authenticator_username = user
+certbot_dns_cpanel:cpanel_username = user
 
 # The cPanel password
-certbot_dns_cpanel:authenticator_password = hunter2
+certbot_dns_cpanel:cpanel_password = hunter2
 ```
 ### 3. Run
 You can now run certbot using the plugin and feeding the credentials file.  
 For exemple, to get a certificate for exemple.com and www.exemple.com:
 ```
 certbot certonly \
---authenticator certbot-dns-cpanel:authenticator \
---certbot-dns-cpanel:authenticator-credentials /path/to/credentials.ini \
+--authenticator certbot-dns-cpanel:cpanel \
+--certbot-dns-cpanel:panel-credentials /path/to/credentials.ini \
 -d exemple.com \
 -d www.exemple.com
 ```
@@ -37,9 +37,9 @@ You will need to install the apache plugin if it's not already present on your s
 pip install certbot-apache
 certbot run \
 --apache \
---authenticator certbot-dns-cpanel:authenticator \
+--authenticator certbot-dns-cpanel:cpanel \
 --installer apache \
---certbot-dns-cpanel:authenticator-credentials /path/to/credentials.ini \
+--certbot-dns-cpanel:cpanel-credentials /path/to/credentials.ini \
 -d '*.exemple.com'
 ```
 The certbot documentation has some additionnal informations about combining authenticator and installer plugins: https://certbot.eff.org/docs/using.html#getting-certificates-and-choosing-plugins
