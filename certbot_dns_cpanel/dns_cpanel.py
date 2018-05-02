@@ -2,8 +2,15 @@
 import logging
 import base64
 import json
-from urllib import request
-from urllib.parse import urlencode
+
+try:
+    # python 3
+    from urllib.request import urlopen, Request
+    from urllib.parse import urlencode
+except ImportError:
+    # python 2
+    from urllib import urlencode
+    from urllib2 import urlopen, Request
 
 import zope.interface
 
@@ -70,7 +77,9 @@ class _CPanelClient:
             'cpanel_jsonapi_module': 'ZoneEdit'
         }
         self.headers = {
-            'Authorization': 'Basic %s' % str(base64.b64encode(bytes("%s:%s" % (username, password), "utf8")), 'utf8')
+            'Authorization': 'Basic %s' % base64.b64encode(
+                ("%s:%s" % (username, password)).encode()
+            ).decode('utf8')
         }
 
     def add_txt_record(self, record_name, record_content, record_ttl=60):
@@ -89,18 +98,18 @@ class _CPanelClient:
         data['txtdata'] = record_content
         data['ttl'] = record_ttl
 
-        with request.urlopen(
-            request.Request(
+        response = urlopen(
+            Request(
                 "%s?%s" % (self.request_url, urlencode(data)),
                 headers=self.headers,
             )
-        ) as response:
-            response_data = json.load(response)['cpanelresult']
-            logger.debug(response_data)
-            if response_data['data'][0]['result']['status'] == 1:
-                logger.info("Successfully added TXT record for %s", record_name)
-            else:
-                raise errors.PluginError("Error adding TXT record: %s" % response_data['data'][0]['result']['statusmsg'])
+        )
+        response_data = json.load(response)['cpanelresult']
+        logger.debug(response_data)
+        if response_data['data'][0]['result']['status'] == 1:
+            logger.info("Successfully added TXT record for %s", record_name)
+        else:
+            raise errors.PluginError("Error adding TXT record: %s" % response_data['data'][0]['result']['statusmsg'])
 
     def del_txt_record(self, record_name, record_content, record_ttl=60):
         """Remove a TXT record
@@ -121,18 +130,18 @@ class _CPanelClient:
         for record_line in record_lines:
             data['line'] = record_line
 
-            with request.urlopen(
-                request.Request(
+            response = urlopen(
+                Request(
                     "%s?%s" % (self.request_url, urlencode(data)),
                     headers=self.headers
                 )
-            ) as response:
-                response_data = json.load(response)['cpanelresult']
-                logger.debug(response_data)
-                if response_data['data'][0]['result']['status'] == 1:
-                    logger.info("Successfully removed TXT record for %s", record_name)
-                else:
-                    raise errors.PluginError("Error removing TXT record: %s" % response_data['data'][0]['result']['statusmsg'])
+            )
+            response_data = json.load(response)['cpanelresult']
+            logger.debug(response_data)
+            if response_data['data'][0]['result']['status'] == 1:
+                logger.info("Successfully removed TXT record for %s", record_name)
+            else:
+                raise errors.PluginError("Error removing TXT record: %s" % response_data['data'][0]['result']['statusmsg'])
 
     def _get_zone_and_name(self, record_domain):
         """Find a suitable zone for a domain
@@ -146,18 +155,18 @@ class _CPanelClient:
         data = self.data.copy()
         data['cpanel_jsonapi_func'] = 'fetchzones'
 
-        with request.urlopen(
-            request.Request(
+        response = urlopen(
+            Request(
                 "%s?%s" % (self.request_url, urlencode(data)),
                 headers=self.headers
             )
-        ) as response:
-            response_data = json.load(response)['cpanelresult']
-            logger.debug(response_data)
-            for zone in response_data['data'][0]['zones']:
-                if record_domain is zone or record_domain.endswith('.' + zone):
-                    cpanel_zone = zone
-                    cpanel_name = record_domain[:-len(zone)-1]
+        )
+        response_data = json.load(response)['cpanelresult']
+        logger.debug(response_data)
+        for zone in response_data['data'][0]['zones']:
+            if record_domain is zone or record_domain.endswith('.' + zone):
+                cpanel_zone = zone
+                cpanel_name = record_domain[:-len(zone)-1]
 
         if not cpanel_zone:
             raise errors.PluginError("Could not get the zone for %s. Is this name in a zone managed in cPanel?" % record_domain)
@@ -183,14 +192,14 @@ class _CPanelClient:
         data['txtdata'] = record_content
         data['ttl'] = record_ttl
 
-        with request.urlopen(
-            request.Request(
+        response = urlopen(
+            Request(
                 "%s?%s" % (self.request_url, urlencode(data)),
                 headers=self.headers
             )
-        ) as response:
-            response_data = json.load(response)['cpanelresult']
-            logger.debug(response_data)
-            record_lines = [int(d['line']) for d in response_data['data']]
+        )
+        response_data = json.load(response)['cpanelresult']
+        logger.debug(response_data)
+        record_lines = [int(d['line']) for d in response_data['data']]
 
         return record_lines
