@@ -167,6 +167,7 @@ class _CPanelClient:
             if record_domain is zone or record_domain.endswith('.' + zone):
                 cpanel_zone = zone
                 cpanel_name = record_domain[:-len(zone)-1]
+                break
 
         if not cpanel_zone:
             raise errors.PluginError("Could not get the zone for %s. Is this name in a zone managed in cPanel?" % record_domain)
