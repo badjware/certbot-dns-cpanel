@@ -5,8 +5,8 @@ Plugin to allow acme dns-01 authentication of a name managed in cPanel. Useful f
 ## Named Arguments
 | Argument | Description |
 | --- | --- |
-| --certbot-dns-cpanel:cpanel-credentials <file> | cPanel credentials INI file **(required)** |
-| --certbot-dns-cpanel:cpanel-propagation-seconds <seconds> | The number of seconds to wait for DNS to propagate before asking the ACME server to verify the DNS record (Default: 30) |
+| --certbot-dns-cpanel:cpanel-credentials &lt;file&gt; | cPanel credentials INI file **(required)** |
+| --certbot-dns-cpanel:cpanel-propagation-seconds &lt;seconds&gt; | The number of seconds to wait for DNS to propagate before asking the ACME server to verify the DNS record (Default: 30) |
 
 ## Install
 ``` bash
@@ -38,8 +38,7 @@ certbot certonly \
 -d '*.exemple.com'
 ```
 
-Tou can also specify a installer plugin with the `--installer` option.
-You will need to install the apache plugin if it's not already present on your system.
+You can also specify a installer plugin with the `--installer` option.
 ``` bash
 certbot run \
 --authenticator certbot-dns-cpanel:cpanel \
