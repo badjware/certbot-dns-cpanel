@@ -2,13 +2,18 @@
 
 Plugin to allow acme dns-01 authentication of a name managed in cPanel. Useful for automating and creating a Let's Encrypt certificate (wildcard or not) for a service with a name managed by cPanel, but installed on a server not managed in cPanel.
 
-## How to use
-### 1. Install
-First, install certbot and the plugin using pip:
+## Named Arguments
+| Argument | Description |
+| --- | --- |
+| --certbot-dns-cpanel:cpanel-credentials &lt;file&gt; | cPanel credentials INI file **(required)** |
+| --certbot-dns-cpanel:cpanel-propagation-seconds &lt;seconds&gt; | The number of seconds to wait for DNS to propagate before asking the ACME server to verify the DNS record (Default: 30) |
+
+## Install
+``` bash
+pip install certbot-dns-cpanel
 ```
-pip install certbot certbot-dns-cpanel
-```
-### 2. Configure
+
+## Credentials
 Download the file `credentials.ini.exemple` and rename it to `credentials.ini`. Edit it to set your cPanel url, username and password.
 ```
 # The url cPanel url
@@ -21,40 +26,39 @@ certbot_dns_cpanel:cpanel_username = user
 # The cPanel password
 certbot_dns_cpanel:cpanel_password = hunter2
 ```
-### 3. Run
+
+## Exemple
 You can now run certbot using the plugin and feeding the credentials file.  
-For exemple, to get a certificate for exemple.com and www.exemple.com:
-```
+For exemple, to get a wildcard certificate for *.exemple.com and exemple.com:
+``` bash
 certbot certonly \
 --authenticator certbot-dns-cpanel:cpanel \
 --certbot-dns-cpanel:panel-credentials /path/to/credentials.ini \
--d exemple.com \
--d www.exemple.com
+-d 'exemple.com' \
+-d '*.exemple.com'
 ```
-To create a wildcard certificate *.exemple.com and install it on an apache server, the installer plugin must be specified with the `--installer` option.
-You will need to install the apache plugin if it's not already present on your system.
-```
-pip install certbot-apache
+
+You can also specify a installer plugin with the `--installer` option.
+``` bash
 certbot run \
---apache \
 --authenticator certbot-dns-cpanel:cpanel \
 --installer apache \
 --certbot-dns-cpanel:cpanel-credentials /path/to/credentials.ini \
+-d 'exemple.com' \
 -d '*.exemple.com'
 ```
-The certbot documentation has some additionnal informations about combining authenticator and installer plugins: https://certbot.eff.org/docs/using.html#getting-certificates-and-choosing-plugins
 
 ## Docker
-A docker image based on [certbot/certbot](https://hub.docker.com/r/certbot/certbot/) is provided for your convenience:
-```
-docker run \
+A docker image [badjware/certbot-dns-cpanel](https://hub.docker.com/r/badjware/certbot-dns-cpanel), based on [certbot/certbot](https://hub.docker.com/r/certbot/certbot) is provided for your convenience:
+``` bash
+docker run -it \
 -v /path/to/credentials.ini:/tmp/credentials.ini \
 badjware/certbot-dns-cpanel \
 certonly \
 --authenticator certbot-dns-cpanel:cpanel \
 --certbot-dns-cpanel:cpanel-credentials /tmp/credentials.ini \
--d exemple.com \
--d www.exemple.com
+-d 'exemple.com' \
+-d '*.exemple.com'
 ```
 
 ## Additional documentation
