@@ -33,7 +33,7 @@ For exemple, to get a wildcard certificate for *.exemple.com and exemple.com:
 ``` bash
 certbot certonly \
 --authenticator certbot-dns-cpanel:cpanel \
---certbot-dns-cpanel:panel-credentials /path/to/credentials.ini \
+--certbot-dns-cpanel:cpanel-credentials /path/to/credentials.ini \
 -d 'exemple.com' \
 -d '*.exemple.com'
 ```
