@@ -1,1 +1,1 @@
-"""cPanel dns-01 authenticator plugin"""
+"""certbot-dns-panel authenticator and installer plugins"""
