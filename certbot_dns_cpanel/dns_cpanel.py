@@ -43,15 +43,30 @@ class Authenticator(dns_common.DNSAuthenticator):
     def more_info(self): # pylint: disable=missing-docstring
         return self.description
 
+    def _validate_credentials(self, credentials):
+        url = credentials.conf('url')
+        username  = credentials.conf('username')
+        token = credentials.conf('token')
+        password = credentials.conf('password')
+
+        if not url:
+            raise errors.PluginError('%s: url is required' % credentials.confobj.filename)
+
+        if not username:
+            raise errors.PluginError('%s: username and token (prefered) or password are required' % credentials.confobj.filename)
+
+        if token:
+            if password:
+                logger.warning('%s: token and password are exclusive, token will be used when both are provided' % credentials.confobj.filename)
+        elif not password:
+            raise errors.PluginError('%s: password or token (prefered) are required' % credentials.confobj.filename) 
+
     def _setup_credentials(self):
         self.credentials = self._configure_credentials(
             'credentials',
             'The cPanel credentials INI file',
-            {
-                'url': 'cPanel url',
-                'username': 'cPanel username',
-                'password': 'cPanel password'
-            }
+            None,
+            self._validate_credentials
         )
 
     def _perform(self, domain, validation_domain_name, validation):
@@ -61,26 +76,40 @@ class Authenticator(dns_common.DNSAuthenticator):
         self._get_cpanel_client().del_txt_record(validation_domain_name, validation)
 
     def _get_cpanel_client(self):
+        if not self.credentials:
+            raise errors.Error('No auth data')
+
+        if self.credentials.conf('token'):
+            return _CPanelClient(self.credentials.conf('url'), self.credentials.conf('username'), None, self.credentials.conf('token'))
+        elif self.credentials.conf('password'):
+            return _CPanelClient(self.credentials.conf('url'), self.credentials.conf('username'), self.credentials.conf('password'), None)
+
         return _CPanelClient(
             self.credentials.conf('url'),
             self.credentials.conf('username'),
-            self.credentials.conf('password')
+            self.credentials.conf('password'),
+            self.credentials.conf('token'),
         )
 
 class _CPanelClient:
     """Encapsulate communications with the cPanel API 2"""
-    def __init__(self, url, username, password):
+    def __init__(self, url, username, password, token):
         self.request_url = "%s/json-api/cpanel" % url
         self.data = {
             'cpanel_jsonapi_user': username,
             'cpanel_jsonapi_apiversion': '2',
             'cpanel_jsonapi_module': 'ZoneEdit'
         }
-        self.headers = {
-            'Authorization': 'Basic %s' % base64.b64encode(
-                ("%s:%s" % (username, password)).encode()
-            ).decode('utf8')
-        }
+
+        if token:
+            self.headers = {
+                'Authorization': 'cpanel %s:%s' % (username, token)
+            }
+        else:
+            self.headers = {
+                'Authorization': 'Basic %s' % base64.b64encode(
+                ("%s:%s" % (username, password)).encode()).decode('utf8')
+            }
 
     def add_txt_record(self, record_name, record_content, record_ttl=60):
         """Add a TXT record
@@ -202,3 +231,5 @@ class _CPanelClient:
         record_lines = [int(d['line']) for d in response_data['data']]
 
         return record_lines
+
+# vim: set ts=4 sw=4:
