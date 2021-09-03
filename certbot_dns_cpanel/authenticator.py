@@ -34,7 +34,7 @@ class Authenticator(dns_common.DNSAuthenticator):
 
     @classmethod
     def add_parser_arguments(cls, add): # pylint: disable=arguments-differ
-        super(Authenticator, cls).add_parser_arguments(add, default_propagation_seconds=10)
+        super(Authenticator, cls).add_parser_arguments(add, default_propagation_seconds=30)
         add("credentials",
             type=str,
             help="The cPanel credentials INI file")
