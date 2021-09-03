@@ -1,6 +1,6 @@
-"""cPanel dns-01 authenticator plugin"""
+"""cerbot-dns-panel authenticator plugin"""
+
 import logging
-import base64
 import json
 
 try:
@@ -24,7 +24,6 @@ logger = logging.getLogger(__name__)
 @zope.interface.implementer(interfaces.IAuthenticator)
 @zope.interface.provider(interfaces.IPluginFactory)
 class Authenticator(dns_common.DNSAuthenticator):
-    """cPanel dns-01 authenticator plugin"""
 
     description = "Obtain a certificate using a DNS TXT record in cPanel"
     problem = "a"
@@ -62,6 +61,7 @@ class Authenticator(dns_common.DNSAuthenticator):
             raise errors.PluginError('%s: password or token (prefered) are required' % credentials.confobj.filename) 
 
     def _setup_credentials(self):
+        logger.debug("setup credentials")
         self.credentials = self._configure_credentials(
             'credentials',
             'The cPanel credentials INI file',
@@ -117,6 +117,7 @@ class _CPanelClient:
         :param str record_content: the content of the TXT record to add
         :param int record_ttl: the TTL of the record to add
         """
+        logger.debug("name='%s', content='%s'" % (record_name, record_content) )
         cpanel_zone, cpanel_name = self._get_zone_and_name(record_name)
 
         data = self.data.copy()
@@ -127,6 +128,7 @@ class _CPanelClient:
         data['txtdata'] = record_content
         data['ttl'] = record_ttl
 
+        logger.debug("req add_zone_record: url='%s', data='%s'" % (self.request_url, urlencode(data) ) )
         response = urlopen(
             Request(
                 "%s?%s" % (self.request_url, urlencode(data)),
@@ -134,7 +136,7 @@ class _CPanelClient:
             )
         )
         response_data = json.load(response)['cpanelresult']
-        logger.debug(response_data)
+        logger.debug("rsp add_zone_record: data='%s'" % json.dumps(response_data, indent=4))
         if response_data['data'][0]['result']['status'] == 1:
             logger.info("Successfully added TXT record for %s", record_name)
         else:
@@ -159,6 +161,7 @@ class _CPanelClient:
         for record_line in record_lines:
             data['line'] = record_line
 
+            logger.debug("req remove_zone_record: url='%s', data='%s'" % (self.request_url, urlencode(data) ) )
             response = urlopen(
                 Request(
                     "%s?%s" % (self.request_url, urlencode(data)),
@@ -166,7 +169,7 @@ class _CPanelClient:
                 )
             )
             response_data = json.load(response)['cpanelresult']
-            logger.debug(response_data)
+            logger.debug("rsp remove_zone_record: data='%s'" % json.dumps(response_data, indent=4))
             if response_data['data'][0]['result']['status'] == 1:
                 logger.info("Successfully removed TXT record for %s", record_name)
             else:
@@ -184,6 +187,7 @@ class _CPanelClient:
         data = self.data.copy()
         data['cpanel_jsonapi_func'] = 'fetchzones'
 
+        logger.debug("req fetchzones: url='%s', data='%s'" % (self.request_url, urlencode(data) ) )
         response = urlopen(
             Request(
                 "%s?%s" % (self.request_url, urlencode(data)),
@@ -191,8 +195,8 @@ class _CPanelClient:
             )
         )
         response_data = json.load(response)['cpanelresult']
-        logger.debug(response_data)
-        matching_zones = {zone for zone in response_data['data'][0]['zones'] if record_domain == zone or record_domain.endswith('.' + zone)}
+        logger.debug("rsp fetchzones: data='%s'" % json.dumps(response_data, indent=4))
+        matching_zones = {zone for zone in response_data['data'][0]['zones'] if response_data['data'][0]['zones'][zone] and (record_domain == zone or record_domain.endswith('.' + zone) ) }
         if matching_zones:
             cpanel_zone = max(matching_zones, key = len)
             cpanel_name = record_domain[:-len(cpanel_zone)-1]
@@ -219,6 +223,7 @@ class _CPanelClient:
         data['type'] = 'TXT'
         data['txtdata'] = record_content
         data['ttl'] = record_ttl
+        logger.debug("req fetchzone_records: url='%s', data='%s'" % (self.request_url, urlencode(data) ) )
 
         response = urlopen(
             Request(
@@ -227,7 +232,7 @@ class _CPanelClient:
             )
         )
         response_data = json.load(response)['cpanelresult']
-        logger.debug(response_data)
+        logger.debug("rsp fetchzone_records: data='%s'" % json.dumps(response_data, indent=4))
         record_lines = [int(d['line']) for d in response_data['data']]
 
         return record_lines

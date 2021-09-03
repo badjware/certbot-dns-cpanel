@@ -9,7 +9,7 @@ with open('README.md') as f:
 setup(
     name='certbot-dns-cpanel',
     version=version,
-    description='certbot plugin to allow acme dns-01 authentication of a name managed in cPanel.',
+    description='certbot plugin to allow dns based automated certificate issuing in cPanel and to install the certificate.',
     long_description=readme,
     long_description_content_type='text/markdown',
     url='https://github.com/badjware/certbot-dns-cpanel',
@@ -31,14 +31,15 @@ setup(
         'Topic :: System :: Systems Administration',
         'Topic :: Utilities',
     ],
-    keywords='certbot letsencrypt cpanel dns-01 plugin',
+    keywords='certbot letsencrypt cpanel dns-01 installer plugin',
     install_requires=[
         'certbot',
         'zope.interface',
     ],
     entry_points={
         'certbot.plugins': [
-            'cpanel = certbot_dns_cpanel.dns_cpanel:Authenticator',
+            'authenticator = certbot_dns_cpanel.authenticator:Authenticator',
+            'installer = certbot_dns_cpanel.installer:Installer',
         ],
     },
 )
