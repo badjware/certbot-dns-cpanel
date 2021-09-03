@@ -8,7 +8,7 @@ And to allow installing the ssl certificate on cPanel, useful if cPanel provider
 | --- | --- |
 | --certbot-dns-cpanel:authenticator-credentials=&lt;file&gt; | cPanel credentials INI file |
 | --certbot-dns-cpanel:authenticator-propagation-seconds=&lt;seconds&gt; | The number of seconds to wait for DNS to propagate before asking the ACME server to verify the DNS record (Default: 30) |
-| --certbot-dns-cpanel:installer-credentials=%lt;file&gt; | same as for the authenticator, pointer to the same INI file |
+| --certbot-dns-cpanel:installer-credentials=&lt;file&gt; | same as for the authenticator, pointer to the same INI file |
 
 ## Install
 ``` bash
