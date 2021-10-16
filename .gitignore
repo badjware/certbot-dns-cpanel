@@ -132,3 +132,5 @@ tags
 # Configuration files
 credentials.ini
 
+# ---> Intellij IDEs
+/.idea
