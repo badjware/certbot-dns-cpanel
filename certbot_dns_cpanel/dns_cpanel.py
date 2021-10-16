@@ -56,13 +56,13 @@ class CpanelConfigurator(dns_common.DNSAuthenticator, common.Installer):
             raise errors.PluginError('%s: url is required' % credentials.confobj.filename)
 
         if not username:
-            raise errors.PluginError('%s: username and token (prefered) or password are required' % credentials.confobj.filename)
+            raise errors.PluginError('%s: username and token (preferred) or password are required' % credentials.confobj.filename)
 
         if token:
             if password:
                 logger.warning('%s: token and password are exclusive, token will be used when both are provided' % credentials.confobj.filename)
         elif not password:
-            raise errors.PluginError('%s: password or token (prefered) are required' % credentials.confobj.filename) 
+            raise errors.PluginError('%s: password or token (preferred) are required' % credentials.confobj.filename)
 
     def _setup_credentials(self):
         self.credentials = self._configure_credentials(

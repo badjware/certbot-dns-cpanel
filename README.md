@@ -14,11 +14,11 @@ pip install certbot-dns-cpanel
 ```
 
 ## Credentials
-Download the file `credentials.ini.exemple` and rename it to `credentials.ini`. Edit it to set your cPanel url, username and password.
+Download the file `credentials.ini.example` and rename it to `credentials.ini`. Edit it to set your cPanel url, username and password.
 ```
 # The url cPanel url
 # include the scheme and the port number (usually 2083 for https)
-certbot_dns_cpanel:cpanel_url = https://cpanel.exemple.com:2083
+certbot_dns_cpanel:cpanel_url = https://cpanel.example.com:2083
 
 # The cPanel username
 certbot_dns_cpanel:cpanel_username = user
@@ -27,15 +27,15 @@ certbot_dns_cpanel:cpanel_username = user
 certbot_dns_cpanel:cpanel_password = hunter2
 ```
 
-## Exemple
-You can now run certbot using the plugin and feeding the credentials file.  
-For exemple, to get a wildcard certificate for *.exemple.com and exemple.com:
+## Example
+You can now run certbot using the plugin and feeding the credentials file.
+For example, to get a wildcard certificate for *.example.com and example.com:
 ``` bash
 certbot certonly \
 --authenticator certbot-dns-cpanel:cpanel \
 --certbot-dns-cpanel:cpanel-credentials /path/to/credentials.ini \
--d 'exemple.com' \
--d '*.exemple.com'
+-d 'example.com' \
+-d '*.example.com'
 ```
 
 You can also specify a installer plugin with the `--installer` option.
@@ -44,8 +44,8 @@ certbot run \
 --authenticator certbot-dns-cpanel:cpanel \
 --installer apache \
 --certbot-dns-cpanel:cpanel-credentials /path/to/credentials.ini \
--d 'exemple.com' \
--d '*.exemple.com'
+-d 'example.com' \
+-d '*.example.com'
 ```
 
 ## Docker
@@ -57,8 +57,8 @@ badjware/certbot-dns-cpanel \
 certonly \
 --authenticator certbot-dns-cpanel:cpanel \
 --certbot-dns-cpanel:cpanel-credentials /tmp/credentials.ini \
--d 'exemple.com' \
--d '*.exemple.com'
+-d 'example.com' \
+-d '*.example.com'
 ```
 
 ## Additional documentation
