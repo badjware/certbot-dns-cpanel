@@ -9,7 +9,7 @@ with open('README.md') as f:
 setup(
     name='certbot-dns-cpanel',
     version=version,
-    description='certbot plugin to allow acme dns-01 authentication of a name managed in cPanel.',
+    description='certbot plugin to allow acme dns-01 authentication & installation of a name managed in cPanel.',
     long_description=readme,
     long_description_content_type='text/markdown',
     url='https://github.com/badjware/certbot-dns-cpanel',

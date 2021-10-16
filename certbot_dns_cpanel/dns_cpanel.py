@@ -1,4 +1,4 @@
-"""cPanel dns-01 authenticator plugin"""
+"""cPanel dns-01 authenticator & installer plugin"""
 import logging
 import base64
 import json
