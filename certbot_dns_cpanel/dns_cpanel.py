@@ -38,7 +38,7 @@ class CpanelConfigurator(dns_common.DNSAuthenticator, common.Installer):
 
     @classmethod
     def add_parser_arguments(cls, add): # pylint: disable=arguments-differ
-        super(CpanelConfigurator, cls).add_parser_arguments(add, default_propagation_seconds=10)
+        super(CpanelConfigurator, cls).add_parser_arguments(add, default_propagation_seconds=30)
         add("credentials",
             type=str,
             help="The cPanel credentials INI file")
