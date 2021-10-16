@@ -38,7 +38,7 @@ setup(
     ],
     entry_points={
         'certbot.plugins': [
-            'cpanel = certbot_dns_cpanel.dns_cpanel:Authenticator',
+            'cpanel = certbot_dns_cpanel.dns_cpanel:CpanelConfigurator',
         ],
     },
 )
