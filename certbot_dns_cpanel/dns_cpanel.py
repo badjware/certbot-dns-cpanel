@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 class CpanelConfigurator(dns_common.DNSAuthenticator, common.Installer):
     """cPanel dns-01 authenticator & installer plugin"""
 
-    description = "Obtain a certificate using a DNS TXT record in cPanel an optionally install it"
+    description = "Obtain a certificate using a DNS TXT record in cPanel and optionally install it"
     problem = "a"
 
     def __init__(self, *args, **kwargs):
