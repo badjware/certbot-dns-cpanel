@@ -38,7 +38,8 @@ certbot certonly \
 -d '*.example.com'
 ```
 
-You can also specify a installer plugin with the `--installer` option.
+You can also specify a installer plugin with the `--installer` option:
+
 ``` bash
 certbot run \
 --authenticator certbot-dns-cpanel:cpanel \
@@ -47,6 +48,20 @@ certbot run \
 -d 'example.com' \
 -d '*.example.com'
 ```
+
+You may also install the certificate onto a domain on your cPanel account:
+
+```bash
+certbot run \
+--authenticator certbot-dns-cpanel:cpanel \
+--installer certbot-dns-cpanel:cpanel \
+--certbot-dns-cpanel:cpanel-credentials /path/to/credentials.ini \
+-d 'example.com' \
+-d '*.example.com'
+```
+
+Depending on your provider you may need to use the `--certbot-dns-cpanel:cpanel-propagation-seconds` option to extend
+the DNS propagation time.
 
 ## Docker
 A docker image [badjware/certbot-dns-cpanel](https://hub.docker.com/r/badjware/certbot-dns-cpanel), based on [certbot/certbot](https://hub.docker.com/r/certbot/certbot) is provided for your convenience:
