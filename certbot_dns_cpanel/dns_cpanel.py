@@ -252,7 +252,7 @@ class _CPanelClient:
         if response_data['data'][0]['result'] == 1:
             logger.info("Successfully installed the SSL certificate for %s", record_domain)
         else:
-            raise errors.PluginError("Error installing the SSL certificate for %s : %s" % record_domain, response_data['data'][0]['output'])
+            raise errors.PluginError("Error installing the SSL certificate for %s : %s" % (record_domain, response_data['data'][0]['output']))
 
     def _get_zone_and_name(self, record_domain):
         """Find a suitable zone for a domain
