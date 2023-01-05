@@ -279,7 +279,7 @@ class _CPanelClient:
             json.dumps(response_data, indent=4)))
         matching_zones = {zone for zone in response_data['data'][0]['zones'] if record_domain == zone or record_domain.endswith('.' + zone)}
         if matching_zones:
-            cpanel_zone = max(matching_zones, key = len)
+            cpanel_zone = min(matching_zones, key = len)
             cpanel_name = record_domain[:-len(cpanel_zone)-1]
         else:
             raise errors.PluginError("Could not get the zone for %s. Is this name in a zone managed in cPanel?" % record_domain)
